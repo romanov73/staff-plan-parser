@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import parser.plan.XlsPlanParser;
 import parser.plan.entity.Employee;
+import parser.plan.entity.Specialty;
 
 @Controller
 public class FileUploadController {
@@ -63,6 +64,8 @@ public class FileUploadController {
             XlsPlanParser parser = new XlsPlanParser(storageService.load(file.getOriginalFilename()).toFile());
             List<Employee> teachers = parser.getTeachers();
             System.out.println(teachers.size());
+            List<Specialty> specialties = parser.getSpecialties();
+            System.out.println(specialties.size());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
