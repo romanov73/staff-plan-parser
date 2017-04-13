@@ -14,7 +14,10 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
+import parser.plan.XlsPlanParser;
+import parser.plan.entity.Employee;
 
 @Controller
 public class FileUploadController {
@@ -31,10 +34,10 @@ public class FileUploadController {
 
         model.addAttribute("files", storageService
                 .loadAll()
-                .map(path ->
-                        MvcUriComponentsBuilder
-                                .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString())
-                                .build().toString())
+                .map(path
+                        -> MvcUriComponentsBuilder
+                        .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString())
+                        .build().toString())
                 .collect(Collectors.toList()));
 
         return "uploadForm";
@@ -47,15 +50,22 @@ public class FileUploadController {
         Resource file = storageService.loadAsResource(filename);
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+file.getFilename()+"\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                 .body(file);
     }
 
     @PostMapping("/")
     public String handleFileUpload(@RequestParam("file") MultipartFile file,
-                                   RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
 
         storageService.store(file);
+        try {
+            XlsPlanParser parser = new XlsPlanParser(storageService.load(file.getOriginalFilename()).toFile());
+            List<Employee> teachers = parser.getTeachers();
+            System.out.println(teachers.size());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         redirectAttributes.addFlashAttribute("message",
                 "You successfully uploaded " + file.getOriginalFilename() + "!");
 
