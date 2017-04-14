@@ -20,6 +20,14 @@ public abstract class BaseEntity {
         hash = 97 * hash + Objects.hashCode(name);
         return hash;
     }
+
+    @Override
+    public String toString() {
+        return "BaseEntity{" + "name=" + name + '}';
+    }
+
+    public String getName() {
+        return name;
+    }
     
-   
 }

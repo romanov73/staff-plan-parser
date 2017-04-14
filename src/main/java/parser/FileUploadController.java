@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import parser.plan.XlsPlanParser;
+import parser.plan.entity.Discipline;
 import parser.plan.entity.Employee;
 import parser.plan.entity.Specialty;
 
@@ -64,8 +65,8 @@ public class FileUploadController {
             XlsPlanParser parser = new XlsPlanParser(storageService.load(file.getOriginalFilename()).toFile());
             List<Employee> teachers = parser.getTeachers();
             System.out.println(teachers.size());
-            List<Specialty> specialties = parser.getSpecialties();
-            System.out.println(specialties.size());
+            List<Discipline> disciplines = parser.getDisciplines();
+            System.out.println(disciplines.size());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
