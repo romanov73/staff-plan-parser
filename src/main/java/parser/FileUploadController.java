@@ -1,5 +1,9 @@
 package parser;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import parser.storage.StorageFileNotFoundException;
 import parser.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +20,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.springframework.http.HttpStatus;
 import parser.plan.XlsPlanParser;
 import parser.plan.entity.Discipline;
 import parser.plan.entity.Employee;
-import parser.plan.entity.Specialty;
 
 @Controller
+@RestController(value=FileUploadController.BASE_PATH)
+@Api(value = "File management")
 public class FileUploadController {
-
+    public final static String BASE_PATH = "file-management";
     private final StorageService storageService;
 
     @Autowired
@@ -79,6 +86,21 @@ public class FileUploadController {
     @ExceptionHandler(StorageFileNotFoundException.class)
     public ResponseEntity handleStorageFileNotFound(StorageFileNotFoundException exc) {
         return ResponseEntity.notFound().build();
+    }
+    
+    
+
+    @RequestMapping(method = RequestMethod.POST, path="/"+BASE_PATH+"/upload")
+    @ApiOperation(value = "getEntityById")
+    @ApiResponses(value = { 
+            @ApiResponse(code = 200, message = "Success", response = Employee.class),
+            @ApiResponse(code = 404, message = "Not Found")
+    })
+    public ResponseEntity<List<Employee>> getTeachers(@RequestParam("file") MultipartFile file) throws IOException, InvalidFormatException {
+        storageService.store(file);
+        XlsPlanParser parser = new XlsPlanParser(storageService.load(file.getOriginalFilename()).toFile());
+        List<Employee> teachers = parser.getTeachers();
+        return new ResponseEntity(teachers, HttpStatus.OK);
     }
 
 }
